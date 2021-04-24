@@ -62,9 +62,16 @@ namespace emojipack.Backend
         {
             if (Program.TESTING)
             {
-                if (AuthService.User.Packs.Count != 0)
+                try
                 {
-                    EventService.SelectedPack = AuthService.User.Packs.First();
+                    if (AuthService.User.Packs.Count != 0)
+                    {
+                        EventService.SelectedPack = AuthService.User.Packs.First();
+                    }
+                }
+                catch
+                {
+
                 }
                 return;
             }
