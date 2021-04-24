@@ -1,4 +1,7 @@
-﻿<div class="row" style="background: var(--background); height: 7%; overflow: hidden;">
+﻿@inject AuthService auth
+@inject NavigationManager nav
+
+<div class="row" style="background: var(--background); height: 7%; overflow: hidden;">
     <MudText Style="margin: auto; margin-left: 30px" Typo="Typo.h6">
         @PackName
     </MudText>
@@ -6,7 +9,7 @@
 </div>
 
 <div class="row" style="background: var(--background); height: 83%; overflow: hidden;">
-    <div style="overflow-y: scroll; max-height: 90vh; padding-bottom: 200px">
+    <div style="overflow-y: scroll; max-height: 83vh; padding-bottom: 200px">
         <div style="padding: 20px">
             @for (int i = 0; i < 50; i++)
             {
@@ -38,7 +41,11 @@
             <MudTextFieldString Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
                                 Label="Search for your emoji" Style="width: 400px"></MudTextFieldString>
         </div>
-        <MudIconButton Icon="@Icons.Filled.AccountCircle" Size="Size.Large" Color="Color.Tertiary"/>
+        <MudMenu Direction="Direction.Top" OffsetY="true" Icon="@Icons.Filled.AccountCircle" Size="Size.Large" Color="Color.Tertiary">
+            <MudMenuItem OnClick="LogoutClicked">
+                Logout
+            </MudMenuItem>
+        </MudMenu>
     </div>
 </div>
 
@@ -67,4 +74,11 @@
     public string PackName { get; set; }
 
     public string SelectedEmoji { get; set; } = "blobban.png";
+
+    private async Task LogoutClicked()
+    {
+        await auth.Logout();
+        nav.NavigateTo("/login");
+    }
+
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
@@ -28,12 +29,14 @@ namespace emojipack.Backend
 
         public async Task<Pack> CreatePack(string name)
         {
+            Debug.Assert(!string.IsNullOrEmpty(name));
             var res = await Program.ApiUrl
                 .AppendPathSegments("pack", "create")
                 .WithOAuthBearerToken(AccessToken)
                 .PostJsonAsync(new
                 {
-                    name
+                    name,
+                    Id
                 })
                 .ReceiveJson();
             var pack = new Pack()

@@ -1,3 +1,122 @@
 ﻿@page "/login"
+@using Microsoft.AspNetCore.Components
+@using emojipack.Model
+@using Blazored.LocalStorage
+@inject AuthService auth
+@inject NavigationManager nav
+@inject ILocalStorageService _storage
+
+<MudCard Class="centered-fixed" Style="min-width: 350px; min-height: 200px;">
+    <MudCardContent>
+        <MudTabs>
+            <MudTabPanel Text="Login">
+                <EditForm Model="@Model" OnValidSubmit="FormSubmit">
+                    <DataAnnotationsValidator/>
+                    <MudText Style="margin-top: 10px">Login to your account</MudText>
+                    <div style="color: red">
+                        <ValidationSummary/>
+                    </div>
+                    <MudTextFieldString @bind-Value="Model.Username" InputType="InputType.Text" Label="Username"/>
+                    <MudTextFieldString @bind-Value="Model.Password" InputType="InputType.Password" Label="Password"/>
+                    <MudCheckBox @bind-Checked="Model.Remember" Label="Keep me signed in" Color="Color.Primary"/>
+                    <div>
+                        @if (ResultMessage == "")
+                        {
+                            <MudButton Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit">Login</MudButton>
+                        }
+                        else
+                        {
+                            <MudText>@ResultMessage</MudText>
+                        }
+                    </div>
+                </EditForm>
+
+            </MudTabPanel>
+            <MudTabPanel Text="Register">
+                <EditForm Model="@Model1" OnValidSubmit="FormSubmit1">
+                    <DataAnnotationsValidator/>
+                    <MudText Style="margin-top: 10px">Register a new account</MudText>
+                    <div style="color: red">
+                        <ValidationSummary/>
+                    </div>
+                    <MudTextFieldString @bind-Value="Model1.Username" InputType="InputType.Text" Label="Username"/>
+                    <MudTextFieldString @bind-Value="Model1.Password" InputType="InputType.Password" Label="Password"/>
+                    <div>
+                        @if (ResultMessage1 == "")
+                        {
+                            <MudButton Style="margin-top: 10px" Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit">Register</MudButton>
+                        }
+                        else
+                        {
+                            <MudText>@ResultMessage1</MudText>
+                        }
+                    </div>
+                </EditForm>
+            </MudTabPanel>
+        </MudTabs>
+    </MudCardContent>
+</MudCard>
 
 
+@code {
+
+    protected override void OnAfterRender(bool first)
+    {
+        Task.Run(async () =>
+        {
+            await Task.Delay(500);
+            if (AuthService.User != null)
+            {
+                nav.NavigateTo("/");
+            }
+        });
+    }
+
+    public LoginModel Model { get; set; } = new LoginModel();
+    public RegisterModel Model1 { get; set; } = new RegisterModel();
+    public string ResultMessage = "";
+    public string ResultMessage1 = "";
+    private async Task FormSubmit()
+    {
+        // REMOVE IN PRODUCTION LOL >:)
+        if (Program.TESTING)
+        {
+            nav.NavigateTo("/"); 
+            AuthService.User = new()
+            {
+                AccessToken = "token",
+                RefreshToken = "refresh",
+                Id = Guid.NewGuid().ToString(),
+                LoginTime = DateTime.UtcNow
+            };
+            await ApiUtils.RefreshUser();
+            await _storage.SetItemAsync("auth", AuthService.User);
+        }
+    // REMOVE IN PRODUCTION LOL
+
+
+
+        var res = await auth.LoginAsync(Model.Username, Model.Password, Model.Remember);
+
+        if (res == null)
+        {
+            ResultMessage = "Invalid credentials!";
+        }
+        else
+        {
+            nav.NavigateTo("/");
+        }
+    }
+    private async Task FormSubmit1()
+    {
+        var res = await auth.RegisterAsync(Model1.Username, Model1.Password);
+        if (res)
+        {
+            ResultMessage = "Account created! You can now log in.";
+        }
+        else
+        {
+            ResultMessage = "Failed creating account!";
+        }
+    }
+}

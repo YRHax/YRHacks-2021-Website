@@ -16,6 +16,7 @@ namespace emojipack
 {
     public class Program
     {
+        public static bool TESTING = true;
         public static string ApiUrl = "https://api.emojipack.cf";
         public static async Task Main(string[] args)
         {

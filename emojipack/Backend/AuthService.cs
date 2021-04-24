@@ -45,7 +45,7 @@ namespace emojipack.Backend
             User = null;
         }
 
-        public async Task<AuthUser> LoginAsync(string username, string password)
+        public async Task<AuthUser> LoginAsync(string username, string password, bool remember)
         {
             var res = await Program.ApiUrl
                 .AppendPathSegments("login")
@@ -61,7 +61,10 @@ namespace emojipack.Backend
                 LoginTime = DateTime.UtcNow
             };
             await ApiUtils.RefreshUser();
-            await _storage.SetItemAsync("auth", User);
+            if (remember)
+            {
+                await _storage.SetItemAsync("auth", User);
+            }
             return User;
         }
     }
