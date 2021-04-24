@@ -1,7 +1,21 @@
 ﻿@inherits LayoutComponentBase
+@inject AuthService auth
+@inject NavigationManager nav
 
 <MudLayout>
     <MudMainContent Style="padding: 0;">
         @Body
     </MudMainContent>
 </MudLayout>
+
+@code
+{
+    protected override async Task OnInitializedAsync()
+    {
+        await auth.Resume();
+        if (AuthService.User == null)
+        {
+            nav.NavigateTo("/login");
+        }
+    }
+}

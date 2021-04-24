@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Blazored.LocalStorage;
+using emojipack.Backend;
 using MudBlazor;
 using MudBlazor.Services;
 
@@ -26,6 +27,8 @@ namespace emojipack
             {
                 x.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
             });
+            builder.Services.AddScoped<AuthService>();
+            builder.Services.AddScoped<QueryService>();
             builder.Services.AddBlazoredLocalStorage();
             await builder.Build().RunAsync();
         }
