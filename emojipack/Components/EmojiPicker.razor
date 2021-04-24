@@ -23,29 +23,15 @@
 </div>
 
 <div class="row" style="background: var(--backgroundGrey); height: 10%">
-    <div class="d-flex" style="margin: auto; margin-left: 20px; width: 100%; padding-right: 20px;">
+    <div style="margin: auto; margin-left: 20px">
         <div id="emojiPreviewBox">
             <img id="emojiPreviewBoxImage" src="@SelectedEmoji"/>
         </div>
-        <div style="padding: 5px; padding-left: 20px">
-            <MudText Typo="Typo.h6">Blob Ban Emoji (to be replaced)</MudText>
-            <MudText Style="color: var(--textSecondary)" Typo="Typo.body1">Used 10 Times (to be replaced)</MudText>
-        </div>
-        <div class="ml-md-auto">
-            
-        </div>
-        <div style="padding: 5px;">
-            <MudTextFieldString Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
-                                Label="Search for your emoji" Style="width: 400px"></MudTextFieldString>
-        </div>
-        <MudIconButton Icon="@Icons.Filled.AccountCircle" Size="Size.Large" Color="Color.Tertiary"/>
     </div>
+
 </div>
 
 <style>
-    .mud-input-control, .mud-input-input-control {
-        margin: 0;
-    }
     #emojiPreviewBox {
         width: 60px;
         height: 60px;
@@ -66,5 +52,5 @@
     [Parameter]
     public string PackName { get; set; }
 
-    public string SelectedEmoji { get; set; } = "blobban.png";
+    public string SelectedEmoji { get; set; }
 }
