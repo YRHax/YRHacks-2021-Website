@@ -35,7 +35,16 @@
                                     }
                                 </div>
                                 <div id="packStyleFooder">
-                                    Waddup
+                                    @* MudFab doesn't show?? *@
+                                    <MudFab id="halp" Color="Color.Primary" IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" Size="Size.Small" Style= background: var(--textDisabled);"/>
+                                    <div id="halp">
+                                        <MudIcon Icon="@Icons.Filled.RemoveRedEye" style="width: 50px; height: 50px;"></MudIcon>
+                                        <MudText Typo="Typo.h5" style="float: right">10</MudText>
+                                    </div>
+                                    <div id="halp">
+                                        <MudIcon Icon="@Icons.Filled.PlaylistAddCheck" style="width: 50px; height: 50px;"></MudIcon>
+                                        <MudText Typo="Typo.h5" style="float:right">4</MudText>
+                                    </div>
                                 </div>
                             </div>
                         }
@@ -47,11 +56,6 @@
 </MudDialog>
 
 <style>
-/*took a look at the css, trying to change the fcolor of the close button, but I cant seem to target css to only that button (ev erything changes if I just traget teh class name*/
-    mud-dialog-title mud-button-root {
-
-        background: red;
-    }
     #packStyle {
         width: 240px; 
         height: 240px; 
@@ -90,6 +94,9 @@
         border-bottom-left-radius: 5px;
         border-bottom-right-radius: 5px;
         display: flex;
+    }
+    #halp {
+        padding: 10px;
     }
 </style>
 
