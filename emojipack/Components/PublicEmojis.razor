@@ -1,15 +1,106 @@
 ﻿
 
-<MudDialog>
+<MudDialog style="border-radius: 5px">
     <DialogContent>
-        <div style="width: 500px; height: 500px;">
+        <div style="width: 960px; height: 540px;">
 
+            @* Headser *@
+            <div style="display: flex;">
+                <div style="width: 800px; height: 75px; background: var(--backgroundGrey); border-radius: 10px; display: flex;">
+                    <div style="padding: 5px; padding-left: 20px; flex-grow: 8">
+                        @* TextField needs to change based on toggle *@
+                        <MudTextFieldString Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" 
+                            Label=@SearchName Style="width: 100%;"></MudTextFieldString>
+                    </div>
+                </div>
+                
+                <MudSwitch @bind-Checked="@toggleSwitch" Color="Color.Primary" style="margin-left: 20px;">
+                    <MudIcon Icon="@Icons.Filled.TagFaces" Size="Size.Large" Color="Color.Tertiary"/>
+                </MudSwitch>
+            </div>
+            
+            <div style="overflow-y: scroll; width: 900px; height: 450px;">
+                <div style="padding: 0px;">
+                    @for(int i = 0; i < 19 ;i++) {
+                        @if(toggleSwitch) {
+                            <div id="emoteStyle">
+                                <img id="emoteImage" src="rooPog.png"/>
+                                <MudIconButton Icon="@Icons.Filled.MoreHoriz" Size="Size.Small" Color="Color.Tertiary" style="margin-left: 105px; margin-top: -15px;"/>
+                            </div>
+                        } else {
+                            <div id="packStyle">
+                                <div>
+                                    @for(int j=0;j < 5;j++) {
+                                        <img id="packImage" src="rooPog.png"/>
+                                    }
+                                </div>
+                                <div id="packStyleFooder">
+                                    @* MudFab doesn't show?? *@
+                                    <MudFab id="halp" Color="Color.Primary" IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" Size="Size.Small" Style= background: var(--textDisabled);"/>
+                                    <div id="halp">
+                                        <MudIcon Icon="@Icons.Filled.RemoveRedEye" style="width: 50px; height: 50px;"></MudIcon>
+                                        <MudText Typo="Typo.h5" style="float: right">10</MudText>
+                                    </div>
+                                    <div id="halp">
+                                        <MudIcon Icon="@Icons.Filled.PlaylistAddCheck" style="width: 50px; height: 50px;"></MudIcon>
+                                        <MudText Typo="Typo.h5" style="float:right">4</MudText>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
         </div>
-        dfgsdhgdjkfg
     </DialogContent>
 </MudDialog>
 
+<style>
+    #packStyle {
+        width: 240px; 
+        height: 240px; 
+        border-radius: 5px; 
+        margin: 25px; 
+        background: var(--backgroundGrey); 
+        display: inline-block;
+        position: relative;
+    }
+    #emoteStyle {
+        width: 140px; 
+        height: 140px; 
+        border-radius: 5px; 
+        margin: 15px; 
+        background: var(--backgroundGrey);
+        display: inline-block;
+        padding: 10px;
+    }
+    #packImage {
+        height: 10px;
+        width: 10px;
+        margin: 10px;
+        border-radius: 5px;
+    }
+    #emoteImage {
+        height: 120px;
+        width: 120px;
+        object-fit: cover;
+    }
+    #packStyleFooder {
+        position: absolute; 
+        height: 60px; 
+        width: 100%; 
+        bottom: 0px; 
+        background: var(--background); 
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+        display: flex;
+    }
+    #halp {
+        padding: 10px;
+    }
+</style>
 
 @code {
-
+    public static bool toggleSwitch { get; set;} = false;
+    public string SearchName = (toggleSwitch? "Search Public Emote":"Search Public Pack");
 }

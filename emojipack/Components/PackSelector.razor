@@ -62,7 +62,10 @@
     {
         dialog.Show<PublicEmojis>("", new DialogOptions()
         {
-            CloseButton = true
+            @*CloseButton = true,*@
+            @*MaxWidth = MaxWidth.Medium*@
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true,
         });
     }
 
