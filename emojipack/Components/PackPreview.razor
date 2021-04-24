@@ -1,5 +1,39 @@
-﻿<h3>PackPreview</h3>
+﻿@*<h3>PackPreview</h3>*@
+
+<div id="pack">
+    <div class="d-flex" style="margin: auto; margin-top: 5px; width: 100%; padding-right: 5px;">
+        <div id="box">
+            <img id="packImage" src="@PackSource" />
+        </div>
+        <MudText Typo="Typo.body2" Style="margin: auto;">@PackName</MudText>
+        <MudIconButton Icon="@Icons.Filled.MoreVert" Size="Size.Large" Color="Color.Tertiary" />
+    </div>
+</div>
+
+<style>
+    #pack {
+        margin: 5px 0 5px 0;
+    }
+    #box {
+        width: 60px;
+        height: 60px;
+        background: var(--backgroundGrey);
+        margin: 5px;
+        border-radius: 5px;
+        display: inline-block;
+        padding: 5px;
+        position: relative;
+    }
+    #packImage {
+        height: 50px;
+        width: 50px;
+        object-fit: cover;
+    }
+</style>
 
 @code {
-
+    [Parameter]
+    public string PackSource { get; set; }
+    [Parameter]
+    public string PackName { get; set; }
 }
