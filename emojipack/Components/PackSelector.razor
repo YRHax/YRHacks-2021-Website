@@ -29,13 +29,17 @@
     <MudButton OnClick="ShowPublicEmojis" Variant="Variant.Filled" Size="Size.Large" Style="background: var(--background); margin: auto; top: -10px; height: 40px; font-size: 20px">Get More</MudButton>
 </div>
 
+
 @code
 {
     private void ShowPublicEmojis()
     {
         dialog.Show<PublicEmojis>("", new DialogOptions()
         {
-            CloseButton = true
+            @*CloseButton = true,*@
+            @*MaxWidth = MaxWidth.Medium*@
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true,
         });
     }
 }

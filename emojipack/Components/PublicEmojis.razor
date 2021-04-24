@@ -1,15 +1,51 @@
 ﻿
 
-<MudDialog>
+<MudDialog style="border-radius: 5px">
     <DialogContent>
-        <div style="width: 500px; height: 500px;">
+        <div style="width: 960px; height: 540px;">
 
+            @* Headser *@
+            <div style="display: flex;">
+                <div style="width: 800px; height: 75px; background: var(--backgroundGrey); border-radius: 10px; display: flex;">
+                    <div style="padding: 5px; padding-left: 20px; flex-grow: 8">
+                        <MudTextFieldString Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
+                            Label="@SearchName" Style="width: 100%;"></MudTextFieldString>
+                    </div>
+                </div>
+                
+                <MudSwitch @bind-Checked="@toggleSwitch" Color="Color.Primary" style="margin-left: 20px;">
+                    <MudIcon Icon="@Icons.Filled.TagFaces" Size="Size.Large" Color="Color.Tertiary"/>
+                </MudSwitch>
+                
+                
+
+            </div>
+            
+
+            @*<div>
+                @for(int i=0;i< 5 ;i++) {
+                     <div style="width: 60px; height: 60px; padding: 25px; background: green;"></div>
+                }
+            </div>*@
         </div>
         dfgsdhgdjkfg
     </DialogContent>
 </MudDialog>
 
+<style>
+/*took a look at the css, trying to change the fcolor of the close button, but I cant seem to target css to only that button (ev erything changes if I just traget teh class name*/
+    mud-dialog-title mud-button-root {
+
+        background: red;
+    }
+    
+    #_d72eeb12f5584a39afd2131b9011ebe7 {
+    /*mud-dialog-title {*/
+        background: var(--backgroundGrey);
+    }
+</style>
 
 @code {
-
+    public string SearchName = "Search Public Pack";
+    public bool toggleSwitch { get; set;} = false;
 }
