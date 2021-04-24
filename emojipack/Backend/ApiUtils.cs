@@ -31,7 +31,7 @@ namespace emojipack.Backend
             if (Program.TESTING)
             {
                 List<Emoji> emojis1 = new List<Emoji>();
-                for(int i = 0; i < 100; i++)
+                for(int i = 0; i < 50; i++)
                 {
                     var emote = new Emoji()
                     {
@@ -78,7 +78,7 @@ namespace emojipack.Backend
             if (Program.TESTING)
             {
                 List<Pack> packs1 = new List<Pack>();
-                for(int i = 0; i < 100; i++)
+                for(int i = 0; i < 9; i++)
                 {
                     var pack = new Pack()
                     {

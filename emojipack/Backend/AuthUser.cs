@@ -57,7 +57,7 @@ namespace emojipack.Backend
                 .PostJsonAsync(new
                 {
                     srcId = id,
-                    name
+                    userId = Id
                 });
             if (res.ResponseMessage.IsSuccessStatusCode)
             {
@@ -67,6 +67,7 @@ namespace emojipack.Backend
                     PackOwner = Id
                 };
                 await ApiUtils.RefreshPack(pack);
+                await pack.RenamePack(name);
                 Packs.Add(pack);
                 return pack;
             }

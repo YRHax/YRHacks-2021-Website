@@ -1,0 +1,48 @@
+﻿<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Clone Emoji
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextFieldString @bind-Value="NewName" Label="Emoji Name"/>
+        <MudSelect Class="mt-3" T="Pack" @bind-Value="SelectedPack" Label="Select a Destination Pack" ToStringFunc="ToStringFunc">
+            @foreach (var v in AuthService.User.Packs)
+            {
+                <MudSelectItem Value="@v"/>
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="Clone" Class="px-5">Clone</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => {MudDialog.Close();})" Class="px-5">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter]
+    public Emoji Source { get; set; }
+
+    public string NewName;
+
+    public Pack SelectedPack;
+
+    protected override void OnInitialized()
+    {
+        NewName = Source.EmojiName;
+    }
+
+    private async Task Clone()
+    {
+        await SelectedPack.CloneEmoji(Source.EmojiId);
+        MudDialog.Close();
+    }
+
+    private string ToStringFunc(Pack arg)
+    {
+        return arg.PackName;
+    }
+
+}

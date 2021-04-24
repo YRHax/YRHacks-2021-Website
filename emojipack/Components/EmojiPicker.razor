@@ -1,45 +1,91 @@
-﻿@inject AuthService auth
+﻿@using System.IO
+@using emojipack.Images
+@using Flurl
+@using Flurl.Http
+@inject AuthService auth
 @inject NavigationManager nav
+@inject ISnackbar snackbar
+@inject IDialogService dialog
 
 <div class="row" style="background: var(--background); height: 7%; overflow: hidden;">
     <MudText Style="margin: auto; margin-left: 30px" Typo="Typo.h6">
-        @PackName
+        @if (EventService.SelectedPack != null)
+        {
+            @EventService.SelectedPack.PackName
+        }
+        else
+        {
+            <p>
+                No Pack Selected! Please select a pack from Your Packs
+            </p>
+        }
+        
     </MudText>
-    <MudFab Color="Color.Primary" IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" Size="Size.Medium" Style="margin: auto; margin-right: 20px"/>
+    @if (EventService.SelectedPack != null)
+    {
+        <InputFile id="fileInput" OnChange="Upload"  accept="image/png,image/tga,image/bmp,image/gif,image/jpeg" hidden multiple/>
+        <MudFab HtmlTag="label" for="fileInput" Color="Color.Primary" IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" 
+                Size="Size.Medium" Style="margin: auto; margin-right: 20px"/>
+    }
+
 </div>
 
 <div class="row" style="background: var(--background); height: 83%; overflow: hidden;">
     <div style="overflow-y: scroll; max-height: 83vh; padding-bottom: 200px">
         <div style="padding: 20px">
-            @for (int i = 0; i < 50; i++)
+            @if (EventService.SelectedPack != null)
             {
-                if(i%2==0) {
-                    <PrivateEmoji ImageSource="blobban.png"/>
+                if (FilteredEmojis.Count == 0)
+                {
+                    <div>
+                        Upload some emojis by clicking the '+' icon
+                    </div>
                 }
                 else
                 {
-                    <PrivateEmoji ImageSource="rooPog.png"/>
+                    foreach (var e in FilteredEmojis)
+                    {
+                        <PrivateEmoji Image="@e"/>
+                    }
                 }
+            }
+            else
+            {
+                
             }
         </div>
     </div>
 </div>
 
 <div class="row" style="background: var(--backgroundGrey); height: 10%">
-    <div class="d-flex" style="margin: auto; margin-left: 20px; width: 100%; padding-right: 20px;">
-        <div id="emojiPreviewBox">
-            <img id="emojiPreviewBoxImage" src="@SelectedEmoji"/>
-        </div>
-        <div style="padding: 5px; padding-left: 20px">
-            <MudText Typo="Typo.h6">Blob Ban Emoji (to be replaced)</MudText>
-            <MudText Style="color: var(--textSecondary)" Typo="Typo.body1">Used 10 Times (to be replaced)</MudText>
-        </div>
+    <div class="d-flex" style="margin: auto; margin-left: 20px; width: 100%; padding-right: 20px;">        
+        @if (EventService.SelectedEmoji != null)
+        {
+            <div id="emojiPreviewBox">
+                <img id="emojiPreviewBoxImage" src="@EventService.SelectedEmoji.GetEmojiSrc().Result"/>
+            </div>
+            <div style="padding: 5px; padding-left: 20px">
+                <MudText Typo="Typo.h6">@EventService.SelectedEmoji.EmojiName</MudText>
+                <MudText Style="color: var(--textSecondary)" Typo="Typo.body1">Used @EventService.SelectedEmoji.ClickCount Times</MudText>
+            </div>
+        }
+        else
+        {
+            <div id="emojiPreviewBox">
+                
+            </div>
+            <div style="padding: 5px; padding-left: 20px">
+                <MudText Typo="Typo.h6">No Emoji</MudText>
+                <MudText Style="color: var(--textSecondary)" Typo="Typo.body1"></MudText>
+            </div>
+        }
+        
         <div class="ml-md-auto">
             
         </div>
         <div style="padding: 5px;">
-            <MudTextFieldString Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
-                                Label="Search for your emoji" Style="width: 400px"></MudTextFieldString>
+            <MudTextFieldString @bind-Value="@SearchQuery" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
+                                Label="Search for your emoji" Style="width: 400px" DebounceInterval="100"/>
         </div>
         <MudMenu Direction="Direction.Top" OffsetY="true" Icon="@Icons.Filled.AccountCircle" Size="Size.Large" Color="Color.Tertiary">
             <MudMenuItem OnClick="LogoutClicked">
@@ -70,15 +116,109 @@
 </style>
 
 @code {
-    [Parameter]
-    public string PackName { get; set; }
 
-    public string SelectedEmoji { get; set; } = "blobban.png";
+    private string _query = "";
+
+    private string SearchQuery
+    {
+        get { return _query; }
+        set { _query = value; ApplyFilter(); }
+    }
+
+    private List<Emoji> FilteredEmojis = new List<Emoji>();
+    private List<Emoji> Emojis = new List<Emoji>();
+
+    public void ApplyFilter()
+    {
+        FilteredEmojis = (from x in Emojis
+            orderby x.ClickCount
+            where x.EmojiName.ToLower().Contains(_query.ToLower()) || _query.ToLower().Contains(x.EmojiName.ToLower())
+            select x).ToList();
+    }
+
+    protected override void OnInitialized()
+    {
+        EventService.SelectPackChangedEvent += async (x) =>
+        {
+            await InvokeAsync(StateHasChanged);
+            FilteredEmojis = x.Emojis;
+            Emojis = x.Emojis;
+            SearchQuery = "";
+        };
+        EventService.HoverEmojiChangedEvent += async ()=> await InvokeAsync(StateHasChanged);
+    }
 
     private async Task LogoutClicked()
     {
         await auth.Logout();
         nav.NavigateTo("/login");
+    }
+
+    public async Task Upload(InputFileChangeEventArgs e)
+    {
+        var o = new DialogOptions()
+        {
+            DisableBackdropClick = true
+        }; 
+
+        if (e.FileCount > 50)
+        {
+            snackbar.Add("Can't upload more than 50 files at once!", Severity.Error, x => x.VisibleStateDuration = 5000);
+            return;
+        }
+
+        if (e.FileCount + EventService.SelectedPack.Emojis.Count > 50)
+        {
+            snackbar.Add($"You already have {EventService.SelectedPack.Emojis.Count} emojis, uploading {e.FileCount} more will exceed the limit of 50 emojis!", Severity.Error, x => x.VisibleStateDuration = 5000);
+            return;
+        }
+
+        var files = new List<IBrowserFile>();
+
+        foreach (var k in e.GetMultipleFiles(50))
+        {
+            Console.WriteLine($"Uploading {k.Name}");
+
+            if (k.Size > 1024 * 256)
+            {
+                snackbar.Add("Can't upload files larger than 256 kb!", Severity.Error, x => x.VisibleStateDuration = 5000);
+                return;
+            }
+
+            files.Add(k);
+        }
+
+        var d = dialog.Show<UploadPopup>("Please wait",o);
+        var res = await Program.ApiUrl.AppendPathSegments("pack", "upload", EventService.SelectedPack.PackId)
+            .WithOAuthBearerToken(AuthService.User.AccessToken)
+            .PostMultipartAsync(async x =>
+            {
+                foreach (var k in files)
+                {
+                    Console.WriteLine($"Uploading {k.Name}");
+
+                    var result = await ImageConverter.ConvertToPng(k.OpenReadStream());
+
+                    var idx = k.Name.LastIndexOf('.');
+                    var name = "";
+                    if (idx != -1) name = k.Name.Substring(0, idx);
+
+                    x.AddFile(name, result, name + ".png", "image/png");
+                }
+            });
+
+        await ApiUtils.RefreshPack(EventService.SelectedPack);
+
+        if (res.ResponseMessage.IsSuccessStatusCode)
+        {
+            snackbar.Add("Uploaded", Severity.Success, x => x.VisibleStateDuration = 5000);
+        }
+        else
+        {
+            snackbar.Add("Failed to upload emojis", Severity.Error, x => x.VisibleStateDuration = 5000);
+        }
+
+        d.Close();
     }
 
 }

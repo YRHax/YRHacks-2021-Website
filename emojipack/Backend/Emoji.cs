@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
@@ -50,10 +51,42 @@ namespace emojipack.Backend
 
         public async Task<byte[]> GetEmoji()
         {
+            if (Program.TESTING)
+            {
+                int r = EmojiId.GetHashCode();
+                if (r % 2 == 0)
+                {
+                    return await Program.DebugBaseAddress.AppendPathSegment("rooPog.png").GetBytesAsync();
+                }
+                else
+                {
+                    return await Program.DebugBaseAddress.AppendPathSegment("blobban.png").GetBytesAsync();
+                }
+            }
             return await Program.ApiUrl
                 .AppendPathSegments("emoji", "load", EmojiId)
                 .WithOAuthBearerToken(AuthService.User.AccessToken)
                 .GetBytesAsync();
+        }
+
+        public async Task<string> GetEmojiSrc()
+        {
+            if (Program.TESTING)
+            {
+                int r = EmojiId.GetHashCode();
+                if (r % 2 == 0)
+                {
+                    return "/rooPog.png";
+                }
+                else
+                {
+                    return "/blobban.png";
+                }
+            }
+            else
+            {
+                return "data:image/bmp;base64," + Convert.ToBase64String(await GetEmoji());
+            }
         }
     }
 }

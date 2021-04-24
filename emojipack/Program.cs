@@ -18,11 +18,12 @@ namespace emojipack
     {
         public static bool TESTING = true;
         public static string ApiUrl = "https://api.emojipack.cf";
+        public static string DebugBaseAddress = "";
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
-
+            DebugBaseAddress = builder.HostEnvironment.BaseAddress;
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddMudServices(x =>
             {

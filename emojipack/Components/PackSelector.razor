@@ -1,25 +1,28 @@
 ﻿@inject IDialogService dialog
+@inject ISnackbar snackbar
 
 <div class="row" style="background: var(--surface); height: 7%;">
     <MudText Style="margin: auto; margin-left: 30px" Typo="Typo.h6">
         Your Packs
     </MudText>
-    <MudFab IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" Size="Size.Small" Style=" margin: auto; margin-right: 20px; background: var(--textDisabled)" />
+    <MudFab OnClick="CreateButton" IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" Size="Size.Small" Style=" margin: auto; margin-right: 20px; background: var(--textDisabled)" />
 </div>
 
 <div class="row" style="background: var(--surface); height: 85%;">
     <div style="overflow-y: scroll; width: 100%;">
         <div style="padding-top: 10px; padding-left: 20px">
-            @for (int i = 0; i < 10; i++)
+            @if (AuthService.User != null && AuthService.User.Packs != null && AuthService.User.Packs.Count != 0)
             {
-                if (i % 2 == 0)
+                @foreach (var e in AuthService.User.Packs)
                 {
-                    <PackPreview PackSource="rooPog.png" PackName="PackNameHooray" />
+                    <PackPreview CurrentPack="@e"/>
                 }
-                else
-                {
-                    <PackPreview PackSource="rooPog.png" PackName="Pack Name" />
-                }
+            }
+            else
+            {
+                <div>
+                    No Packs!
+                </div>
             }
         </div>
     </div>
@@ -29,13 +32,59 @@
     <MudButton OnClick="ShowPublicEmojis" Variant="Variant.Filled" Size="Size.Large" Style="background: var(--background); margin: auto; top: -10px; height: 40px; font-size: 20px">Get More</MudButton>
 </div>
 
+
+<MudDialog @bind-IsVisible="CreateVisible">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Rename Pack
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextFieldString @bind-Value="Name" Label="New Name"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="Create" Class="px-5">Create new Pack</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => {CreateVisible = false;})" Class="px-5">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code
 {
+    protected override void OnInitialized()
+    {
+        EventService.AuthLoadedEvent += async () =>
+        {
+            await InvokeAsync(StateHasChanged);
+        };
+    }
+
     private void ShowPublicEmojis()
     {
         dialog.Show<PublicEmojis>("", new DialogOptions()
         {
             CloseButton = true
         });
+    }
+
+    private bool CreateVisible;
+    private string Name;
+
+    private async Task Create(MouseEventArgs obj)
+    {
+        var created = await AuthService.User.CreatePack(Name);
+        EventService.SelectedPack = created;
+        EventService.InvokeSelectPackChangedEvent(created);
+    }
+
+    private void CreateButton()
+    {
+        if (AuthService.User.Packs.Count < 10)
+        {
+            CreateVisible = true;
+        }
+        else
+        {
+            snackbar.Add("You have reached the limit of 10 packs!");
+        }
     }
 }

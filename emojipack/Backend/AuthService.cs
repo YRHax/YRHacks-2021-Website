@@ -32,6 +32,7 @@ namespace emojipack.Backend
             if (await _storage.ContainKeyAsync("auth"))
             {
                 User = await _storage.GetItemAsync<AuthUser>("auth");
+                await ApiUtils.RefreshUser();
             }
         }
 

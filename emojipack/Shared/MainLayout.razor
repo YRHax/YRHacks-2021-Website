@@ -17,5 +17,9 @@
         {
             nav.NavigateTo("/login");
         }
+        else
+        {
+            EventService.InvokeAuthLoad();
+        }
     }
 }

@@ -1,0 +1,11 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText>
+            Please wait while the emojis are being processed and uploaded... This may take some time
+        </MudText>
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7"/>
+    </DialogContent>
+</MudDialog>
+@code {
+    [CascadingParameter] public MudDialogInstance MudDialog { get; set; }
+}

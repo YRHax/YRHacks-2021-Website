@@ -9,12 +9,12 @@ namespace emojipack.Images
 {
     public class ImageConverter
     {
-        public static async Task<byte[]> ConvertToPng(byte[] input)
+        public static async Task<MemoryStream> ConvertToPng(Stream input)
         {
-            var img = Image.Load(input);
+            var img = await Image.LoadAsync(input);
             var ms = new MemoryStream();
             await img.SaveAsPngAsync(ms);
-            return ms.ToArray();
+            return ms;
         }
     }
 }

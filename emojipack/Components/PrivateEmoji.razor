@@ -1,13 +1,34 @@
-﻿<div id="emojiBox">
-    <MudIconButton Icon="@Icons.Filled.MoreHoriz" Size="Size.Small" Color="Color.Tertiary" Style="position: absolute; z-index: 999; bottom: 1px; right: 1px;"/>
-    <img id="emojiBoxImage" src="@ImageSource"/>
+﻿@inject IJSRuntime jsr
+@inject ISnackbar snackbar
+@inject IDialogService dialog
+<div id="emojiBox">
+
+
+
+    <img id="emojiBoxImage" src="@Image.GetEmojiSrc().Result" @onmouseover="@EmojiHovered" @onclick="@EmojiCopy"/>
+    <div style="position: absolute; bottom: 1px; right: 1px;">
+        <MudMenu Direction="Direction.Bottom" Icon="@Icons.Filled.MoreHoriz" Size="Size.Small"
+                 Color="Color.Tertiary" Dense="true">
+            <MudMenuItem OnClick="@(() => { RenameVisible = true; newName = Image.EmojiName;})">
+                Rename Emoji
+            </MudMenuItem>
+            <MudMenuItem OnClick="@(() => { DeleteVisible = true;})">
+                Delete Emoji
+            </MudMenuItem>
+            <MudMenuItem OnClick="Clone">
+                Clone Emoji to
+            </MudMenuItem>
+        </MudMenu>
+    </div>
 </div>
 
 @* <MudFab Color="Color.Primary" IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" Size="Size.Medium" Style="margin: auto; margin-right: 20px"/>*@
 
 <style>
+    .mud-popover {
+        z-index: 100000 !important;
+    }
     #emojiBox {
-        
         width: 152px;
         height: 152px;
         background: var(--surface);
@@ -18,15 +39,99 @@
         position: relative;
     }
     #emojiBoxImage {
+        cursor: pointer;
         object-fit: cover;
         height: 132px;
         width: 132px;
         object-fit: cover;
     }
+    #emojiBoxImage:hover {
+        transition-timing-function: ease-in-out;
+        transition: 0.2s;
+        opacity: 0.7;
+    }
 </style>
+
+<MudDialog @bind-IsVisible="RenameVisible">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Rename Emoji
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextFieldString @bind-Value="newName" Label="New Name"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="Rename" Class="px-5">Rename</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => {RenameVisible = false;})" Class="px-5">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<MudDialog @bind-IsVisible="DeleteVisible">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Delete Emoji
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body1">
+            Are you sure you want to delete this emoji? This action is irreversible.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="Delete" Class="px-5">Delete</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => {DeleteVisible = false;})" Class="px-5">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code
 {
     [Parameter]
-    public string ImageSource { get; set; }
+    public Emoji Image { get; set; }
+
+    private void EmojiHovered()
+    {
+        EventService.SelectedEmoji = Image;
+        EventService.InvokeHoverEmojiChangedEvent();
+    }
+
+    private async Task EmojiCopy()
+    {
+        var wjsr = (IJSUnmarshalledRuntime) jsr;
+        wjsr.InvokeUnmarshalled<byte[], bool>("copyEmoji", await Image.GetEmoji());
+        snackbar.Add("Image Copied to Clipboard!", Severity.Success);
+    }
+
+    private bool RenameVisible;
+    private string newName;
+
+    private async Task Rename(MouseEventArgs obj)
+    {
+        await Image.RenameEmoji(newName);
+        RenameVisible = false;
+    }
+
+    private bool DeleteVisible;
+
+    private async Task Delete(MouseEventArgs obj)
+    {
+        var pack = from x in AuthService.User.Packs
+            where (
+                from q in x.Emojis
+                    where q.EmojiId == Image.EmojiId
+                select q.EmojiId
+                ).Any()
+            select x;
+
+        var val = pack.First();
+        await val.DeleteEmoji(Image);
+        DeleteVisible = false;
+    }
+
+    private void Clone()
+    {
+        var param = new DialogParameters();
+        param["source"] = Image;
+        dialog.Show<CopyEmojiComponent>("", param);
+    }
 }

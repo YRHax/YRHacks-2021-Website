@@ -82,5 +82,20 @@ namespace emojipack.Backend
             }
             return null;
         }
+
+        public async Task<string> GetEmojiPreviewSource()
+        {
+            if (Emojis.Count != 0)
+            {
+                var x = (from q in Emojis
+                    orderby q.ClickCount descending
+                    select q).First();
+                return await x.GetEmojiSrc();
+            }
+            else
+            {
+                return "unknown.png";
+            }
+        }
     }
 }
