@@ -7,7 +7,7 @@
     <MudFab IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" Size="Size.Small" Style=" margin: auto; margin-right: 20px; background: var(--textDisabled)" />
 </div>
 
-<div class="row" style="background: var(--surface); height: 85%;">
+<div class="row" style="background: var(--surface); max-height: 85%;">
     <div style="overflow-y: scroll; max-height: 85vh; width: 100%;">
         <div style="padding-top: 15px; padding-left: 20px">
             @for (int i = 0; i < 10; i++)
@@ -18,14 +18,13 @@
                 }
                 else
                 {
-                    <PackPreview PackSource="rooPog.png" PackName="Pack Name Hooray Hurroay" />
+                    <PackPreview PackSource="rooPog.png" PackName="Pack Name" />
                 }
-
             }
         </div>
     </div>
 </div>
 
 <div class="row" style="background: var(--surface); height: 8%;">
-    <MudButton Variant="Variant.Filled" Size="Size.Large" Style="background: var(--background); margin: auto; top: -10px; height: 50px; font-size: 20px">Get More</MudButton>
+    <MudButton Variant="Variant.Filled" Size="Size.Large" Style="background: var(--background); margin: auto; top: -10px; height: 40px; font-size: 20px">Get More</MudButton>
 </div>
