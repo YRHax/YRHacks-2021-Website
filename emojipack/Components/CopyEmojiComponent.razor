@@ -36,7 +36,15 @@
 
     private async Task Clone()
     {
-        await SelectedPack.CloneEmoji(Source.EmojiId);
+        if (Program.TESTING)
+        {
+            await SelectedPack.CloneEmojiOffline(Source);
+        }
+        else
+        {
+            await SelectedPack.CloneEmoji(Source.EmojiId);
+        }
+            
         MudDialog.Close();
     }
 

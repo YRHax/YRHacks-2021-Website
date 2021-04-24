@@ -33,6 +33,14 @@ namespace emojipack.Backend
             {
                 User = await _storage.GetItemAsync<AuthUser>("auth");
                 await ApiUtils.RefreshUser();
+                Task.Run(async () =>
+                {
+                    while (true)
+                    {
+                        await Task.Delay(100);
+                        await _storage.SetItemAsync("auth", User);
+                    }
+                });
             }
         }
 
@@ -62,10 +70,14 @@ namespace emojipack.Backend
                 LoginTime = DateTime.UtcNow
             };
             await ApiUtils.RefreshUser();
-            if (remember)
+            Task.Run(async () =>
             {
-                await _storage.SetItemAsync("auth", User);
-            }
+                while (true)
+                {
+                    await Task.Delay(100);
+                    await _storage.SetItemAsync("auth", User);
+                }
+            });
             return User;
         }
     }

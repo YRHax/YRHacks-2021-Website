@@ -33,5 +33,13 @@ namespace emojipack.Backend
         {
             HoverEmojiChangedEvent?.Invoke();
         }
+
+        public delegate void EmojiChanged();
+        public static event EmojiChanged EmojiChangedEvent;
+
+        public static void InvokeEmojiChangedEvent()
+        {
+            EmojiChangedEvent?.Invoke();
+        }
     }
 }

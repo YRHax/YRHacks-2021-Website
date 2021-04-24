@@ -30,21 +30,6 @@ namespace emojipack.Backend
         {
             if (Program.TESTING)
             {
-                List<Emoji> emojis1 = new List<Emoji>();
-                for(int i = 0; i < 50; i++)
-                {
-                    var emote = new Emoji()
-                    {
-                        ClickCount = 0,
-                        EmojiName = $"e#{i}-{pack.PackName}",
-                        EmojiId = Guid.NewGuid().ToString(),
-                        EmojiOwnerId = AuthService.User.Id,
-                        EmojiPackId = pack.PackId
-                    };
-                    emojis1.Add(emote);
-                }
-
-                pack.Emojis = emojis1;
                 return;
             }
 
@@ -77,25 +62,16 @@ namespace emojipack.Backend
         {
             if (Program.TESTING)
             {
-                List<Pack> packs1 = new List<Pack>();
-                for(int i = 0; i < 9; i++)
+                if (AuthService.User.Packs.Count != 0)
                 {
-                    var pack = new Pack()
-                    {
-                        PackId = Guid.NewGuid().ToString(),
-                        PackName = $"Pack #{i}"
-                    };
-                    await RefreshPack(pack);
-                    packs1.Add(pack);
+                    EventService.SelectedPack = AuthService.User.Packs.First();
                 }
-
-                AuthService.User.Packs = packs1;
                 return;
             }
 
             var user = AuthService.User;
             var res = await Program.ApiUrl
-                .AppendPathSegments("query","user",user.Id)
+                .AppendPathSegments("users",user.Id)
                 .WithOAuthBearerToken(user.AccessToken)
                 .GetAsync()
                 .ReceiveJson();

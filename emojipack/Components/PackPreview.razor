@@ -3,7 +3,10 @@
 <div id="@(IsSelected?"pack2":"pack")">
     <div class="d-flex" style="margin: auto; margin-top: 5px; width: 100%; padding-right: 5px;">
         <div id="box" @onclick="@Selected">
-            <img id="packImage" src="@CurrentPack.GetEmojiPreviewSource().Result" />
+            @if (CurrentPack.Emojis.Count != 0)
+            {
+                <img id="packImage" src="@CurrentPack.GetEmojiPreviewSource().Result"/>
+            }
         </div>
         <MudText @onclick="@Selected" Typo="Typo.body2" Style="margin: auto; cursor: pointer">@CurrentPack.PackName</MudText>
 
@@ -14,20 +17,23 @@
             <MudMenuItem OnClick="@(() => { DeleteVisible = true;})">
                 Delete Pack
             </MudMenuItem>
-            <MudMenuItem OnClick="@(async () => await CurrentPack.ChangeVisibility(!CurrentPack.Visibility))">
-                @if (CurrentPack.Visibility)
-                {
-                    <p>
-                        Make Private
-                    </p>
-                }
-                else
-                {
-                    <p>
-                        Make Public
-                    </p>
-                }
-            </MudMenuItem>
+            @if (!Program.TESTING)
+            {
+                <MudMenuItem OnClick="@(async () => await CurrentPack.ChangeVisibility(!CurrentPack.Visibility))">
+                    @if (CurrentPack.Visibility)
+                    {
+                        <p>
+                            Make Private
+                        </p>
+                    }
+                    else
+                    {
+                        <p>
+                            Make Public
+                        </p>
+                    }
+                </MudMenuItem>
+            }
         </MudMenu>
     </div>
 </div>
@@ -119,6 +125,10 @@
                 }
             }
         };
+        EventService.EmojiChangedEvent += async () =>
+        {
+            await InvokeAsync(StateHasChanged);
+        };
     }
 
     private void Selected()
@@ -133,6 +143,7 @@
     private async Task Rename(MouseEventArgs obj)
     {
         await CurrentPack.RenamePack(newName);
+        EventService.InvokeEmojiChangedEvent();
         RenameVisible = false;
     }
 
@@ -140,8 +151,10 @@
 
     private async Task Delete(MouseEventArgs obj)
     {
-        await AuthService.User.DeletePack(CurrentPack);
         DeleteVisible = false;
+        StateHasChanged();
+        await AuthService.User.DeletePack(CurrentPack);
+        EventService.InvokeEmojiChangedEvent();
     }
 
 }

@@ -27,16 +27,25 @@
         </div>
     </div>
 </div>
+@if (!Program.TESTING)
+{
+    <div class="row" style="background: var(--surface); height: 8%;">
+        <MudButton OnClick="ShowPublicEmojis" Variant="Variant.Filled" Size="Size.Large" Style="background: var(--background); margin: auto; top: -10px; height: 40px; font-size: 20px">Get More</MudButton>
+    </div>
+}
+else
+{
+    <div class="row" style="background: var(--surface); height: 8%;">
+        
+    </div>
+}
 
-<div class="row" style="background: var(--surface); height: 8%;">
-    <MudButton OnClick="ShowPublicEmojis" Variant="Variant.Filled" Size="Size.Large" Style="background: var(--background); margin: auto; top: -10px; height: 40px; font-size: 20px">Get More</MudButton>
-</div>
 
 
 <MudDialog @bind-IsVisible="CreateVisible">
     <TitleContent>
         <MudText Typo="Typo.h6">
-            Rename Pack
+            Create Pack
         </MudText>
     </TitleContent>
     <DialogContent>
@@ -53,6 +62,10 @@
     protected override void OnInitialized()
     {
         EventService.AuthLoadedEvent += async () =>
+        {
+            await InvokeAsync(StateHasChanged);
+        };
+        EventService.EmojiChangedEvent += async () =>
         {
             await InvokeAsync(StateHasChanged);
         };
@@ -77,6 +90,7 @@
         var created = await AuthService.User.CreatePack(Name);
         EventService.SelectedPack = created;
         EventService.InvokeSelectPackChangedEvent(created);
+        CreateVisible = false;
     }
 
     private void CreateButton()

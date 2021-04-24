@@ -2,21 +2,15 @@
 @inject ISnackbar snackbar
 @inject IDialogService dialog
 <div id="emojiBox">
-
-
-
-    <img id="emojiBoxImage" src="@Image.GetEmojiSrc().Result" @onmouseover="@EmojiHovered" @onclick="@EmojiCopy"/>
+    <img id="emojiBoxImage" src="@Image.GetEmojiSrc().Result" @onclick="@EmojiCopy" @onmouseover="EmojiHover"/>
     <div style="position: absolute; bottom: 1px; right: 1px;">
         <MudMenu Direction="Direction.Bottom" Icon="@Icons.Filled.MoreHoriz" Size="Size.Small"
                  Color="Color.Tertiary" Dense="true">
-            <MudMenuItem OnClick="@(() => { RenameVisible = true; newName = Image.EmojiName;})">
-                Rename Emoji
-            </MudMenuItem>
-            <MudMenuItem OnClick="@(() => { DeleteVisible = true;})">
-                Delete Emoji
-            </MudMenuItem>
             <MudMenuItem OnClick="Clone">
                 Clone Emoji to
+            </MudMenuItem>
+            <MudMenuItem OnClick="@(() => { DeleteVisible = true;})">
+                Delete
             </MudMenuItem>
         </MudMenu>
     </div>
@@ -31,7 +25,7 @@
     #emojiBox {
         width: 152px;
         height: 152px;
-        background: var(--surface);
+        background: var(--backgroundGrey);
         margin: 8px;
         border-radius: 5px;
         display: inline-block;
@@ -52,21 +46,6 @@
     }
 </style>
 
-<MudDialog @bind-IsVisible="RenameVisible">
-    <TitleContent>
-        <MudText Typo="Typo.h6">
-            Rename Emoji
-        </MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudTextFieldString @bind-Value="newName" Label="New Name"/>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="Rename" Class="px-5">Rename</MudButton>
-        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => {RenameVisible = false;})" Class="px-5">Cancel</MudButton>
-    </DialogActions>
-</MudDialog>
-
 <MudDialog @bind-IsVisible="DeleteVisible">
     <TitleContent>
         <MudText Typo="Typo.h6">
@@ -84,48 +63,26 @@
     </DialogActions>
 </MudDialog>
 
+
 @code
 {
     [Parameter]
     public Emoji Image { get; set; }
-
-    private void EmojiHovered()
-    {
-        EventService.SelectedEmoji = Image;
-        EventService.InvokeHoverEmojiChangedEvent();
-    }
 
     private async Task EmojiCopy()
     {
         var wjsr = (IJSUnmarshalledRuntime) jsr;
         wjsr.InvokeUnmarshalled<byte[], bool>("copyEmoji", await Image.GetEmoji());
         snackbar.Add("Image Copied to Clipboard!", Severity.Success);
+        Image.ClickCount++;
+        EventService.InvokeEmojiChangedEvent();
     }
 
-    private bool RenameVisible;
-    private string newName;
-
-    private async Task Rename(MouseEventArgs obj)
+    private void EmojiHover()
     {
-        await Image.RenameEmoji(newName);
-        RenameVisible = false;
-    }
-
-    private bool DeleteVisible;
-
-    private async Task Delete(MouseEventArgs obj)
-    {
-        var pack = from x in AuthService.User.Packs
-            where (
-                from q in x.Emojis
-                    where q.EmojiId == Image.EmojiId
-                select q.EmojiId
-                ).Any()
-            select x;
-
-        var val = pack.First();
-        await val.DeleteEmoji(Image);
-        DeleteVisible = false;
+        EventService.SelectedEmoji = Image;
+        EventService.InvokeHoverEmojiChangedEvent();
+        EventService.InvokeEmojiChangedEvent();
     }
 
     private void Clone()
@@ -133,5 +90,16 @@
         var param = new DialogParameters();
         param["source"] = Image;
         dialog.Show<CopyEmojiComponent>("", param);
+    }
+
+    private bool DeleteVisible;
+
+    private async Task Delete(MouseEventArgs obj)
+    {
+        DeleteVisible = false;
+
+        StateHasChanged();
+        await EventService.SelectedPack.DeleteEmoji(Image);
+        EventService.InvokeEmojiChangedEvent();
     }
 }

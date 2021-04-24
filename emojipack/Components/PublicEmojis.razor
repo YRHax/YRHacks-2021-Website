@@ -3,47 +3,53 @@
 <MudDialog style="border-radius: 5px">
     <DialogContent>
         <div style="width: 960px; height: 540px;">
-
-            @* Headser *@
+            @* Header *@
             <div style="display: flex;">
                 <div style="width: 800px; height: 75px; background: var(--backgroundGrey); border-radius: 10px; display: flex;">
                     <div style="padding: 5px; padding-left: 20px; flex-grow: 8">
                         @* TextField needs to change based on toggle *@
                         <MudTextFieldString Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" 
-                            Label=@SearchName Style="width: 100%;"></MudTextFieldString>
+                            Label="@SearchName" Style="width: 100%;"></MudTextFieldString>
                     </div>
                 </div>
                 
                 <MudSwitch @bind-Checked="@toggleSwitch" Color="Color.Primary" style="margin-left: 20px;">
-                    <MudIcon Icon="@Icons.Filled.TagFaces" Size="Size.Large" Color="Color.Tertiary"/>
+                    <MudIcon Icon="@SearchIcon" Size="Size.Large" Color="Color.Tertiary"/>
                 </MudSwitch>
             </div>
             
             <div style="overflow-y: scroll; width: 900px; height: 450px;">
-                <div style="padding: 0px;">
+                <div style="padding: 10px;">
                     @for(int i = 0; i < 19 ;i++) {
-                        @if(toggleSwitch) {
+                        if(toggleSwitch) {
                             <div id="emoteStyle">
                                 <img id="emoteImage" src="rooPog.png"/>
                                 <MudIconButton Icon="@Icons.Filled.MoreHoriz" Size="Size.Small" Color="Color.Tertiary" style="margin-left: 105px; margin-top: -15px;"/>
                             </div>
                         } else {
                             <div id="packStyle">
+                                <MudText style="margin-left: 5px; margin-left: 10px; margin-top: 5px; z-index: 999; width: 100%; margin: 5px" >
+                                    This is the pack name
+                                </MudText>
                                 <div>
-                                    @for(int j=0;j < 5;j++) {
-                                        <img id="packImage" src="rooPog.png"/>
+                                    @for (int j = 0; j < 6; j++)
+                                    {
+                                        <img id="packImageP" src="rooPog.png"/>
                                     }
                                 </div>
+
                                 <div id="packStyleFooder">
-                                    @* MudFab doesn't show?? *@
-                                    <MudFab id="halp" Color="Color.Primary" IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" Size="Size.Small" Style= background: var(--textDisabled);"/>
-                                    <div id="halp">
-                                        <MudIcon Icon="@Icons.Filled.RemoveRedEye" style="width: 50px; height: 50px;"></MudIcon>
-                                        <MudText Typo="Typo.h5" style="float: right">10</MudText>
-                                    </div>
-                                    <div id="halp">
-                                        <MudIcon Icon="@Icons.Filled.PlaylistAddCheck" style="width: 50px; height: 50px;"></MudIcon>
-                                        <MudText Typo="Typo.h5" style="float:right">4</MudText>
+                                    <div class="d-flex align-content-center" style="margin: auto; width: 100%; margin-left: 5px; padding-right: 0px;">
+
+                                        <MudFab Color="Color.Primary" IconSize="Size.Small" Icon="@Icons.Material.Filled.Add"
+                                                Size="Size.Small" Style="background: var(--textDisabled); margin-left: 10px"/>
+
+                                        <div style="margin: auto; margin-left: 5px;">
+                                            <div class="ml-3 d-inline-block">
+                                                <MudIcon Icon="@Icons.Filled.PlaylistAdd" Size="Size.Small"/>
+                                                <MudText Typo="Typo.body2" Style="margin-left: 5px; float: right">4</MudText>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -57,10 +63,10 @@
 
 <style>
     #packStyle {
-        width: 240px; 
-        height: 240px; 
+        width: 215px; 
+        height: 220px; 
         border-radius: 5px; 
-        margin: 25px; 
+        margin: 10px;
         background: var(--backgroundGrey); 
         display: inline-block;
         position: relative;
@@ -74,11 +80,14 @@
         display: inline-block;
         padding: 10px;
     }
-    #packImage {
-        height: 10px;
-        width: 10px;
+    #packImageP {
+        opacity: 0.9;
+        margin-top: 5px;
         margin: 10px;
         border-radius: 5px;
+        height: 50px;
+        width: 50px;
+        object-fit: cover;
     }
     #emoteImage {
         height: 120px;
@@ -95,12 +104,18 @@
         border-bottom-right-radius: 5px;
         display: flex;
     }
-    #halp {
-        padding: 10px;
-    }
 </style>
 
 @code {
     public static bool toggleSwitch { get; set;} = false;
-    public string SearchName = (toggleSwitch? "Search Public Emote":"Search Public Pack");
+
+    public string SearchName
+    {
+        get { return (toggleSwitch ? "Search Public Emotes" : "Search Public Packs"); }
+    }
+
+    public string SearchIcon
+    {
+        get { return (toggleSwitch ? Icons.Material.Filled.TagFaces : Icons.Material.Filled.Collections); }
+    }
 }

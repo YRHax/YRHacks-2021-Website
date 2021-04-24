@@ -14,11 +14,18 @@ namespace emojipack.Backend
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }
         public DateTime LoginTime { get; set; }
-
-        [NonSerialized] public List<Pack> Packs = new List<Pack>();
+        
+        public List<Pack> Packs { get; set; } = new List<Pack>();
 
         public async Task DeletePack(Pack pack)
         {
+            if (Program.TESTING)
+            {
+                Packs.Remove(pack);
+                EventService.InvokeHoverEmojiChangedEvent();
+                return;
+            }
+
             Packs.Remove(pack);
             await Program.ApiUrl
                 .AppendPathSegments("pack", "delete",pack.PackId)
@@ -29,6 +36,22 @@ namespace emojipack.Backend
 
         public async Task<Pack> CreatePack(string name)
         {
+            if (Program.TESTING)
+            {
+                var cpack = new Pack()
+                {
+                    PackId = Guid.NewGuid().ToString(),
+                    PackName = name,
+                    Emojis = new List<Emoji>(),
+                    PackCount = 0,
+                    PackOwner = Id
+                };
+                //await ApiUtils.RefreshPack(cpack);
+                Packs.Add(cpack);
+                return cpack;
+            }
+
+
             Debug.Assert(!string.IsNullOrEmpty(name));
             var res = await Program.ApiUrl
                 .AppendPathSegments("pack", "create")

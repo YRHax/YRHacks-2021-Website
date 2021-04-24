@@ -31,8 +31,8 @@
 </div>
 
 <div class="row" style="background: var(--background); height: 83%; overflow: hidden;">
-    <div style="overflow-y: scroll; max-height: 83vh; padding-bottom: 200px">
-        <div style="padding: 20px">
+    <div style="overflow-y: scroll; max-height: 83vh; padding-bottom: 200px; width: 100%">
+        <div style="padding: 20px; width: 100%">
             @if (EventService.SelectedPack != null)
             {
                 if (FilteredEmojis.Count == 0)
@@ -131,13 +131,18 @@
     public void ApplyFilter()
     {
         FilteredEmojis = (from x in Emojis
-            orderby x.ClickCount
+            orderby x.ClickCount descending 
             where x.EmojiName.ToLower().Contains(_query.ToLower()) || _query.ToLower().Contains(x.EmojiName.ToLower())
             select x).ToList();
     }
 
     protected override void OnInitialized()
     {
+        EventService.EmojiChangedEvent += async () =>
+        {
+            await InvokeAsync(StateHasChanged);
+            ApplyFilter();
+        };
         EventService.SelectPackChangedEvent += async (x) =>
         {
             await InvokeAsync(StateHasChanged);
@@ -159,29 +164,29 @@
         var o = new DialogOptions()
         {
             DisableBackdropClick = true
-        }; 
+        };
 
-        if (e.FileCount > 50)
+        if (e.FileCount > 5000)
         {
             snackbar.Add("Can't upload more than 50 files at once!", Severity.Error, x => x.VisibleStateDuration = 5000);
             return;
         }
 
-        if (e.FileCount + EventService.SelectedPack.Emojis.Count > 50)
+        if (e.FileCount + EventService.SelectedPack.Emojis.Count > 5000)
         {
-            snackbar.Add($"You already have {EventService.SelectedPack.Emojis.Count} emojis, uploading {e.FileCount} more will exceed the limit of 50 emojis!", Severity.Error, x => x.VisibleStateDuration = 5000);
+            snackbar.Add($"You already have {EventService.SelectedPack.Emojis.Count} emojis, uploading {e.FileCount} more will exceed the limit of 5000 emojis!", Severity.Error, x => x.VisibleStateDuration = 5000);
             return;
         }
 
         var files = new List<IBrowserFile>();
 
-        foreach (var k in e.GetMultipleFiles(50))
+        foreach (var k in e.GetMultipleFiles(5000))
         {
             Console.WriteLine($"Uploading {k.Name}");
 
-            if (k.Size > 1024 * 256)
+            if (k.Size > 1024 * 1024)
             {
-                snackbar.Add("Can't upload files larger than 256 kb!", Severity.Error, x => x.VisibleStateDuration = 5000);
+                snackbar.Add("Can't upload files larger than 1mb!", Severity.Error, x => x.VisibleStateDuration = 5000);
                 return;
             }
 
@@ -189,36 +194,68 @@
         }
 
         var d = dialog.Show<UploadPopup>("Please wait",o);
-        var res = await Program.ApiUrl.AppendPathSegments("pack", "upload", EventService.SelectedPack.PackId)
-            .WithOAuthBearerToken(AuthService.User.AccessToken)
-            .PostMultipartAsync(async x =>
-            {
-                foreach (var k in files)
-                {
-                    Console.WriteLine($"Uploading {k.Name}");
 
-                    var result = await ImageConverter.ConvertToPng(k.OpenReadStream());
-
-                    var idx = k.Name.LastIndexOf('.');
-                    var name = "";
-                    if (idx != -1) name = k.Name.Substring(0, idx);
-
-                    x.AddFile(name, result, name + ".png", "image/png");
-                }
-            });
-
-        await ApiUtils.RefreshPack(EventService.SelectedPack);
-
-        if (res.ResponseMessage.IsSuccessStatusCode)
+        if (Program.TESTING)
         {
-            snackbar.Add("Uploaded", Severity.Success, x => x.VisibleStateDuration = 5000);
+            foreach (var k in files)
+            {
+                Console.WriteLine($"Storing {k.Name}");
+
+                var result = await ImageConverter.ConvertToPng(k.OpenReadStream());
+
+                var data = Convert.ToBase64String(result.ToArray());
+
+                var pack = EventService.SelectedPack;
+                var idx = k.Name.LastIndexOf('.');
+                var name = "";
+                if (idx != -1) name = k.Name.Substring(0, idx);
+                var emote = new Emoji()
+                {
+                    ClickCount = 0,
+                    EmojiData = data,
+                    EmojiId = Guid.NewGuid().ToString(),
+                    EmojiName = name,
+                    EmojiOwnerId = AuthService.User.Id,
+                    EmojiPackId = pack.PackId
+                };
+
+                pack.Emojis.Add(emote);
+            }
         }
         else
         {
-            snackbar.Add("Failed to upload emojis", Severity.Error, x => x.VisibleStateDuration = 5000);
-        }
+            var res = await Program.ApiUrl.AppendPathSegments("pack", "upload", EventService.SelectedPack.PackId)
+                .WithOAuthBearerToken(AuthService.User.AccessToken)
+                .PostMultipartAsync(async x =>
+                {
+                    foreach (var k in files)
+                    {
+                        Console.WriteLine($"Uploading {k.Name}");
 
+                        var result = await ImageConverter.ConvertToPng(k.OpenReadStream());
+
+                        var idx = k.Name.LastIndexOf('.');
+                        var name = "";
+                        if (idx != -1) name = k.Name.Substring(0, idx);
+
+                        x.AddFile(name, result, name + ".png", "image/png");
+                    }
+                });
+
+            await ApiUtils.RefreshPack(EventService.SelectedPack);
+            if (res.ResponseMessage.IsSuccessStatusCode)
+            {
+                snackbar.Add("Uploaded", Severity.Success, x => x.VisibleStateDuration = 5000);
+            }
+            else
+            {
+                snackbar.Add("Failed to upload emojis", Severity.Error, x => x.VisibleStateDuration = 5000);
+            }
+        }
+        
         d.Close();
+
+        EventService.InvokeEmojiChangedEvent();
     }
 
 }

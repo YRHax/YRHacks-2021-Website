@@ -12,10 +12,17 @@ namespace emojipack.Backend
         public string PackOwner { get; set; }
         public string PackName { get; set; }
         public string PackId { get; set; }
+        // only used for querying global packs
+        public int PackCount { get; set; }
         public bool Visibility { get; set; }
         public List<Emoji> Emojis { get; set; } = new List<Emoji>();
         public async Task RenamePack(string name)
         {
+            if (Program.TESTING)
+            {
+                PackName = name;
+                return;
+            }
             var res = await Program.ApiUrl
                 .AppendPathSegments("pack", "edit")
                 .WithOAuthBearerToken(AuthService.User.AccessToken)
@@ -46,6 +53,11 @@ namespace emojipack.Backend
         }
         public async Task DeleteEmoji(Emoji emoji)
         {
+            if (Program.TESTING)
+            {
+                Emojis.Remove(emoji);
+                return;
+            }
             var res = await Program.ApiUrl
                 .AppendPathSegments("emoji", "delete", emoji.EmojiId)
                 .WithOAuthBearerToken(AuthService.User.AccessToken)
@@ -58,6 +70,21 @@ namespace emojipack.Backend
         }
         public async Task<Emoji> CloneEmoji(string source)
         {
+            if (Program.TESTING)
+            {
+                var emote = new Emoji()
+                {
+                    EmojiId = Guid.NewGuid().ToString(),
+                    EmojiOwnerId = PackOwner,
+                    EmojiPackId = PackId,
+                    ClickCount = 0,
+
+                };
+                //await ApiUtils.RefreshEmoji(emote);
+                Emojis.Add(emote);
+                return emote;
+            }
+
             var res = await Program.ApiUrl
                 .AppendPathSegments("emoji", "clone")
                 .WithOAuthBearerToken(AuthService.User.AccessToken)
@@ -78,6 +105,27 @@ namespace emojipack.Backend
                 };
                 await ApiUtils.RefreshEmoji(emote);
                 Emojis.Add(emote);
+                return emote;
+            }
+            return null;
+        }
+
+        public async Task<Emoji> CloneEmojiOffline(Emoji source)
+        {
+            if (Program.TESTING)
+            {
+                var emote = new Emoji()
+                {
+                    EmojiId = Guid.NewGuid().ToString(),
+                    EmojiOwnerId = PackOwner,
+                    EmojiPackId = PackId,
+                    ClickCount = 0,
+                    EmojiData = source.EmojiData,
+                    EmojiName = source.EmojiName
+                };
+                //await ApiUtils.RefreshEmoji(emote);
+                Emojis.Add(emote);
+                EventService.InvokeEmojiChangedEvent();
                 return emote;
             }
             return null;
