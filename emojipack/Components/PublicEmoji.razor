@@ -1,0 +1,23 @@
+﻿<div id="emojiBox">
+    <img src="@ImageSource" style="object-fit: cover;"/>
+</div>
+
+<style>
+    #emojiBox {
+        width: 100px;
+        height: 100px;
+        background: var(--surface);
+        margin: 8px;
+        border-radius: 5px;
+        display: inline-block;
+    }
+    img {
+        
+    }
+</style>
+
+@code
+{
+    [Parameter]
+    public string ImageSource { get; set; }
+}

@@ -1,0 +1,35 @@
+@using MudBlazor
+<MudThemeProvider Theme="theme"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@code
+{
+    MudTheme theme = new()
+    {
+        Palette = new()
+        {
+            AppbarBackground = "#1D1D1D",
+            AppbarText = "#F9F6F9",
+            TextPrimary = "#F9F6F9",
+            TextSecondary = "#DCDDDE",
+            TextDisabled = "#72767D",
+            Primary = "#FD6A02",
+            Secondary = "#00A2F2",
+            Tertiary = "#FFFFFF",
+            Surface = "#202225",
+            Background = "#36393F",
+            BackgroundGrey = "#40444B"
+        }
+    };
+}

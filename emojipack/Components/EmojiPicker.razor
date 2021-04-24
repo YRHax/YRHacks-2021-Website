@@ -1,0 +1,56 @@
+﻿<div class="row" style="background: var(--background); height: 7%; overflow: hidden;">
+    <MudText Style="margin: auto; margin-left: 30px" Typo="Typo.h6">
+        @PackName
+    </MudText>
+    <MudFab Color="Color.Primary" IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" Size="Size.Medium" Style="margin: auto; margin-right: 20px"/>
+</div>
+
+<div class="row" style="background: var(--background); height: 83%; overflow: hidden;">
+    <div style="overflow-y: scroll; max-height: 90vh; padding-bottom: 200px">
+        <div style="padding: 20px">
+            @for (int i = 0; i < 20; i++)
+            {
+                if(i%2==0) {
+                    <PrivateEmoji ImageSource="blobban.png"/>
+                }
+                else
+                {
+                    <PrivateEmoji ImageSource="rooPog.png"/>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row" style="background: var(--backgroundGrey); height: 10%">
+    <div style="margin: auto; margin-left: 20px">
+        <div id="emojiPreviewBox">
+            <img id="emojiPreviewBoxImage" src="@SelectedEmoji"/>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    #emojiPreviewBox {
+        width: 60px;
+        height: 60px;
+        background: var(--surface);
+        border-radius: 2px;
+        display: inline-block;
+        padding: 2px;
+        position: relative;
+    }
+    #emojiPreviewBoxImage {
+        object-fit: cover;
+        height: 56px;
+        width: 56px;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public string PackName { get; set; }
+
+    public string SelectedEmoji { get; set; }
+}

@@ -1,0 +1,32 @@
+﻿<div id="emojiBox">
+    <MudIconButton Icon="@Icons.Filled.MoreHoriz" Size="Size.Small" Color="Color.Tertiary" Style="position: absolute; z-index: 999; bottom: 1px; right: 1px;"/>
+    <img id="emojiBoxImage" src="@ImageSource"/>
+</div>
+
+@* <MudFab Color="Color.Primary" IconSize="Size.Large" Icon="@Icons.Material.Filled.Add" Size="Size.Medium" Style="margin: auto; margin-right: 20px"/>*@
+
+<style>
+    #emojiBox {
+        
+        width: 152px;
+        height: 152px;
+        background: var(--surface);
+        margin: 8px;
+        border-radius: 5px;
+        display: inline-block;
+        padding: 10px;
+        position: relative;
+    }
+    #emojiBoxImage {
+        object-fit: cover;
+        height: 132px;
+        width: 132px;
+        object-fit: cover;
+    }
+</style>
+
+@code
+{
+    [Parameter]
+    public string ImageSource { get; set; }
+}
